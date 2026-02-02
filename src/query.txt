@@ -1,0 +1,216 @@
+==============================
+Connect To MongoDB Atlas
+==============================
+mongosh "mongodb+srv://Mokhtar_db_user:mokhtar123@cluster0.xxlhpqn.mongodb.net/"
+
+
+=========================================
+Use Database
+===========================
+use book_shop
+
+
+==============================
+Create Books Collection With Validator
+==============================
+db.createCollection("books", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["title"],
+      properties: {
+        title: {
+          bsonType: "string",
+          minLength: 1,
+          description: "title must be a non-empty string"
+        }
+      }
+    }
+  }
+})
+
+
+==============================
+Create Authors Collection And Insert Author
+==============================
+db.authors.insertOne({
+  name: "Ahmed Mokhtar"
+})
+
+
+==================================
+Insert Book
+=========================================
+db.books.insertOne({
+  title: "Mongo Basics",
+  author: "Ahmed Mokhtar",
+  year: 2020,
+  genres: ["Education", "Technology"]
+})
+
+
+================================
+Create Unique Index On Title
+===========================
+db.books.createIndex(
+  { title: 1 },
+  { unique: true }
+)
+
+
+==============================
+Insert Many Books
+=================================
+db.books.insertMany([
+  {
+    title: "Node.js Guide",
+    author: "Ali Hassan",
+    year: 2019,
+    genres: ["Technology"]
+  },
+  {
+    title: "Express Deep Dive",
+    author: "Sara Ahmed",
+    year: 2022,
+    genres: ["Programming", "Web"]
+  },
+  {
+    title: "Database Systems",
+    author: "Omar Khaled",
+    year: 2018,
+    genres: ["Education"]
+  }
+])
+
+
+==============================
+Update Book Year By Title
+==============================
+db.books.updateOne(
+  { title: "Mongo Basics" },
+  { $set: { year: 2022 } }
+)
+
+
+==============================
+Find Book By Title
+==================================
+db.books.findOne({
+  title: "Mongo Basics"
+})
+
+
+====================================
+Find Books Between Years
+==============================
+db.books.find({
+  year: { $gte: 2019, $lte: 2022 }
+})
+
+
+==============================
+Find Books By Genre
+==================================
+db.books.find({
+  genres: "Technology"
+})
+
+
+==================================
+Get Books With Skip And Limit
+==============================
+db.books.find()
+  .sort({ year: -1 })
+  .skip(1)
+  .limit(2)
+
+
+==============================
+Find Books Where Year Is Integer
+=============================================
+db.books.find({===============
+  year: { $type: "int" }
+})
+
+
+==============================
+Exclude Specific Genres
+==============================
+db.books.find({
+  genres: { $nin: ["Horror", "Science Fiction"] }
+})
+
+
+=============================================
+Delete Books Before Specific Year
+==============================
+db.books.deleteMany({
+  year: { $lt: 2019 }
+})
+
+
+==============================
+Aggregation Filter And Sort
+=============================================
+db.books.aggregate([
+  { $match: { year: { $gt: 2000 } } },
+  { $sort: { year: -1 } }
+])
+
+
+=============================================
+Aggregation Project Fields
+=============================================
+db.books.aggregate([
+  { $match: { year: { $gt: 2000 } } },
+  {
+    $project: {
+      title: 1,
+      author: 1,
+      year: 1,
+      _id: 0
+    }
+  }
+])
+
+
+=============================================
+Aggregation Unwind Genres
+=============================================
+db.books.aggregate([
+  { $unwind: "$genres" }
+])
+
+
+==============================
+Create Logs Collection (Capped)
+==============================
+db.createCollection("log", {
+  capped: true,
+  size: 1024
+})
+
+
+=============================================
+Insert Log
+==============================
+db.log.insertOne({
+  bookTitle: "Mongo Basics",
+  action: "created",
+  timestamp: new Date()
+})
+
+
+==============================
+Aggregation Join Books With Logs
+=============================================
+db.books.aggregate([
+  {
+    $lookup: {
+      from: "log",
+      localField: "title",
+      foreignField: "bookTitle",
+      as: "book_activity_logs"
+    }
+  }
+])

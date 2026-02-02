@@ -1,6 +1,4 @@
 node_modules/
-dist/
-.vscode/
 config/.env.development
 config/.env.production
 .env
